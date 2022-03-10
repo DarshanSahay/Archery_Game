@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
     public int totalPoint = 0;
     private float speed;
     private float launchForce;
+    private float mouseSensitivity;
     private Vector3 direction;
 
     private void Awake()
@@ -38,6 +39,9 @@ public class PlayerController : MonoBehaviour
     {
         speed = 4;
         launchForce = 30f;
+        mouseSensitivity = 50f;
+        playerRotation.rotation = transform.rotation;
+        camRotation.rotation = followCamera.transform.rotation;
     }
     void Update()
     {
@@ -60,8 +64,12 @@ public class PlayerController : MonoBehaviour
     }
     void HandleRotation()
     {
-        float mouseY = Input.GetAxis("Mouse Y");
-        float mouseX = Input.GetAxis("Mouse X");
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        if (canRotate)
+        {
+            Mathf.Clamp(mouseX, -15, 15);
+            transform.Rotate(0, mouseX * Time.deltaTime, 0);
+        }
     }
     [PunRPC]
     public void Initialize(Player player)
@@ -75,10 +83,7 @@ public class PlayerController : MonoBehaviour
         float vertical = horizontalJoystick.Horizontal;
         direction = new Vector3(0f, 0f, vertical).normalized;
         player.Move(new Vector3(0, 0, direction.z * Time.deltaTime) * speed);
-        if (canRotate)
-        {
-            transform.Rotate(0, Input.GetAxis("Horizontal") * 100 * Time.deltaTime, 0);
-        }
+        
         if(direction != Vector3.zero)
         {
             anim.SetBool("canMove", true);
@@ -111,6 +116,8 @@ public class PlayerController : MonoBehaviour
         arrow.transform.rotation = Quaternion.LookRotation(arrow.GetComponent<Rigidbody>().velocity);
         GameManager.instance.canShoot = false;
         canRotate = false;
+        transform.rotation = Quaternion.Lerp(transform.rotation, playerRotation.rotation, Time.time * 0.05f);
+        followCamera.transform.rotation = Quaternion.Lerp(followCamera.transform.rotation, camRotation.rotation, Time.time * 0.05f);
         followCamera.gameObject.SetActive(true);
         Destroy(arrow, 5f);
     }
