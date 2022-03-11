@@ -23,6 +23,7 @@ A Multiplayer Archery Game
 
 <p><img align ="centre"![alt text] src = "https://github.com/DarshanSahay/Archery_Game/blob/main/Assets/Game%20Screemshots/Image%203.png" width="700" height="500" /></p>
 
+## Gifs
 <p><img align ="centre" alt = "gif" src="https://github.com/DarshanSahay/Archery_Game/blob/main/Assets/Game%20Screemshots/Gif%201.gif" width="700" height="400" /></p>
 
 <p><img align ="centre" alt = "gif" src="https://github.com/DarshanSahay/Archery_Game/blob/main/Assets/Game%20Screemshots/Gif%202.gif" width="700" height="400" /></p>
