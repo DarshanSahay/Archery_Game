@@ -17,15 +17,19 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CharacterController player;
     [SerializeField] private Transform shootPoint;
     [SerializeField] private Transform playerSpine;
+    [SerializeField] private Transform playerRotation;
+    [SerializeField] private Transform camRotation;
     [SerializeField] private GameObject arrowPrefab;
     [SerializeField] private GameObject followCamera;
     [SerializeField] private GameObject aimCamera;
+    [SerializeField] private GameObject eventSystem;
     [SerializeField] private GameObject playerCrossHair;
     [SerializeField] private Camera cam;
     [SerializeField] private Joystick horizontalJoystick;
     [SerializeField] private Button shootButton;
-    
-    public int totalPoint = 0;
+    public int totalPoint;
+
+
     private float speed;
     private float launchForce;
     private float mouseSensitivity;
@@ -57,6 +61,7 @@ public class PlayerController : MonoBehaviour
                 followCamera.gameObject.SetActive(true);
                 horizontalJoystick.gameObject.SetActive(true);
                 shootButton.gameObject.SetActive(true);
+                eventSystem.gameObject.SetActive(true);
                 HandleSidewaysMovement();
                 HandleRotation();
             }
@@ -65,10 +70,11 @@ public class PlayerController : MonoBehaviour
     void HandleRotation()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+
         if (canRotate)
         {
             Mathf.Clamp(mouseX, -15, 15);
-            transform.Rotate(0, mouseX * Time.deltaTime, 0);
+            transform.Rotate(0, mouseX  * Time.deltaTime, 0);
         }
     }
     [PunRPC]
@@ -83,7 +89,7 @@ public class PlayerController : MonoBehaviour
         float vertical = horizontalJoystick.Horizontal;
         direction = new Vector3(0f, 0f, vertical).normalized;
         player.Move(new Vector3(0, 0, direction.z * Time.deltaTime) * speed);
-        
+
         if(direction != Vector3.zero)
         {
             anim.SetBool("canMove", true);
@@ -100,10 +106,10 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("hasShoot", false);
         aimCamera.gameObject.SetActive(true);
         playerCrossHair.gameObject.SetActive(true);
+        canRotate = true;
     }
     public void HoldShootButton()
     {
-        canRotate = true;
         anim.SetBool("hasShoot", true);
         anim.SetBool("canShoot", false);
         aimCamera.gameObject.SetActive(false);
@@ -116,15 +122,18 @@ public class PlayerController : MonoBehaviour
         arrow.transform.rotation = Quaternion.LookRotation(arrow.GetComponent<Rigidbody>().velocity);
         GameManager.instance.canShoot = false;
         canRotate = false;
-        transform.rotation = Quaternion.Lerp(transform.rotation, playerRotation.rotation, Time.time * 0.05f);
+        transform.rotation = Quaternion.Lerp(transform.rotation, playerRotation.rotation,Time.time * 0.05f);
         followCamera.transform.rotation = Quaternion.Lerp(followCamera.transform.rotation, camRotation.rotation, Time.time * 0.05f);
         followCamera.gameObject.SetActive(true);
         Destroy(arrow, 5f);
     }
 
-    [PunRPC]
-    public void AddPoints(int point)
+    public void AddPoints(int point,Player currentPlayer)
     {
+        totalPoint = (int)currentPlayer.CustomProperties["PlayerScore"];
         totalPoint += point;
+        ExitGames.Client.Photon.Hashtable updatedScore = new ExitGames.Client.Photon.Hashtable();
+        updatedScore["PlayerScore"] = totalPoint;
+        currentPlayer.SetCustomProperties(updatedScore);
     }
 }

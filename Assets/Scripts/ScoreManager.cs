@@ -3,30 +3,39 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Photon.Pun;
+using Photon.Realtime;
 
-public class ScoreManager : MonoBehaviour
+public class ScoreManager : MonoBehaviourPunCallbacks
 {
     public static ScoreManager instance;
     public PhotonView view;
-    private int player1Score;
-    private int player2Score;
     [SerializeField] private TextMeshProUGUI player1ScoreText;
-    [SerializeField] private TextMeshProUGUI player2ScoreText;
 
     private void Awake()
     {
         instance = this;
     }
-    private void Update()
+    private void Start()
     {
-        UpdatePlayerScore();
+        
     }
     [PunRPC]
     public void UpdatePlayerScore()
     {
-        player1Score = GameManager.instance.currentPlayer[0].totalPoint;
-        player2Score = GameManager.instance.currentPlayer[1].totalPoint;
-        player1ScoreText.text = PhotonNetwork.PlayerList[0].NickName + " Score : " + player1Score.ToString();
-        player2ScoreText.text = PhotonNetwork.PlayerList[1].NickName + " Score : " + player2Score.ToString();
+        player1ScoreText.text = "";
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            player1ScoreText.text += player.NickName + " : " + player.CustomProperties["PlayerScore"] + "\n";
+        }
     }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+    {
+        player1ScoreText.text = "";
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            player1ScoreText.text += player.NickName + " : " + player.CustomProperties["PlayerScore"] + "\n";
+        }
+    }
+
 }

@@ -8,9 +8,11 @@ using TMPro;
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public static GameManager instance;
+    public ScoreManager scoreManager;
     public PlayerController[] currentPlayer;
     public PhotonView view;
     public bool canShoot = false;
+    public List<int> playersScore = new List<int>();
 
     private int playersInGame;
     private bool hasGameEnded = false;
@@ -67,6 +69,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             PlayerController playerScript = playerObj.GetComponent<PlayerController>();
             playerScript.view.RPC("Initialize", RpcTarget.All, PhotonNetwork.LocalPlayer);
         }
+        scoreManager.UpdatePlayerScore();
     }
     void StartTurn()                             //after player instantiates in game scene , start their turns
     {
@@ -109,15 +112,19 @@ public class GameManager : MonoBehaviourPunCallbacks
             hasGameEnded = true;
             if (hasGameEnded)
             {
-                if (currentPlayer[0].totalPoint == currentPlayer[1].totalPoint)
+                foreach (Player player in PhotonNetwork.PlayerList)
+                {
+                    playersScore.Add((int)player.CustomProperties["PlayerScore"]);
+                }
+                if (playersScore[0] == playersScore[1])
                 {
                     winnerText.text = "Game Is a Draw";
                 }
-                if (currentPlayer[0].totalPoint > currentPlayer[1].totalPoint)
+                if (playersScore[0] > playersScore[1])
                 {
                     winnerText.text = PhotonNetwork.PlayerList[0].NickName + " Is Winner";
                 }
-                else if(currentPlayer[0].totalPoint < currentPlayer[1].totalPoint)
+                else if(playersScore[0] < playersScore[1])
                 {
                     winnerText.text = PhotonNetwork.PlayerList[1].NickName + " Is Winner";
                 }

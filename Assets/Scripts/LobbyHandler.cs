@@ -50,7 +50,12 @@ public class LobbyHandler : MonoBehaviourPunCallbacks
     {
         SetScreen(lobbyScreen);
         photonView.RPC("UpdateLobbyUI", RpcTarget.All);
+        ExitGames.Client.Photon.Hashtable playerProperty = new ExitGames.Client.Photon.Hashtable();
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperty);
+        playerProperty["PlayerScore"] = 0;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperty);
     }
+
     [PunRPC]
     public void UpdateLobbyUI()
     {
@@ -67,6 +72,10 @@ public class LobbyHandler : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)        //updating lobby after a player leaves the room
     {
         UpdateLobbyUI();
+    }
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        
     }
     public void OnLeaveLobbyButton()                              
     {
